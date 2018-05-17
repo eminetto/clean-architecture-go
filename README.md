@@ -1,5 +1,7 @@
 # Clean Architecture in Go
 
+[![Build Status](https://travis-ci.org/eminetto/clean-architecture-go.svg?branch=master)](https://travis-ci.org/eminetto/clean-architecture-go)
+
 Clean Architecture sample
 
 ## Post
