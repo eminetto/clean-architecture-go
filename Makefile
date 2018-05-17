@@ -15,6 +15,7 @@ clean:
 	rm -rf bin/*
 
 dependencies:
+	go get -u github.com/golang/dep/cmd/dep
 	dep ensure
 
 build: dependencies build-api build-cmd
