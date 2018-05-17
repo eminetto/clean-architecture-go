@@ -1,0 +1,14 @@
+version: "3"
+services:
+  mongodb:
+    image: mongo
+    ports:
+        - "27017:27017"
+    container_name: bookmark-mongodb
+    network_mode: "bridge"
+  node:
+    image: node:8-alpine
+    network_mode: "bridge"
+    volumes:
+        - ./web:/web
+        - /tmp:/tmp
