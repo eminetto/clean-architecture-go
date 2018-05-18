@@ -14,7 +14,8 @@ import (
 )
 
 func TestBookmarkIndex(t *testing.T) {
-	service := bookmark.NewServiceMock()
+	repo := bookmark.NewInmemRepository()
+	service := bookmark.NewService(repo)
 	b := &entity.Bookmark{
 		Name:        "Elton Minetto",
 		Description: "Minetto's page",
@@ -31,7 +32,8 @@ func TestBookmarkIndex(t *testing.T) {
 }
 
 func TestBookmarkIndexNotFound(t *testing.T) {
-	service := bookmark.NewServiceMock()
+	repo := bookmark.NewInmemRepository()
+	service := bookmark.NewService(repo)
 	ts := httptest.NewServer(bookmarkIndex(service))
 	defer ts.Close()
 	res, err := http.Get(ts.URL + "?name=github")
@@ -40,7 +42,8 @@ func TestBookmarkIndexNotFound(t *testing.T) {
 }
 
 func TestBookmarkSearch(t *testing.T) {
-	service := bookmark.NewServiceMock()
+	repo := bookmark.NewInmemRepository()
+	service := bookmark.NewService(repo)
 	b := &entity.Bookmark{
 		Name:        "Elton Minetto",
 		Description: "Minetto's page",
@@ -57,7 +60,8 @@ func TestBookmarkSearch(t *testing.T) {
 }
 
 func TestBookmarkAdd(t *testing.T) {
-	service := bookmark.NewServiceMock()
+	repo := bookmark.NewInmemRepository()
+	service := bookmark.NewService(repo)
 	h := bookmarkAdd(service)
 
 	ts := httptest.NewServer(h)

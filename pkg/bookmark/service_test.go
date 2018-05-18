@@ -8,7 +8,8 @@ import (
 )
 
 func TestStore(t *testing.T) {
-	service := NewServiceMock()
+	repo := NewInmemRepository()
+	service := NewService(repo)
 	b := &entity.Bookmark{
 		Name:        "Elton Minetto",
 		Description: "Minetto's page",
@@ -22,7 +23,8 @@ func TestStore(t *testing.T) {
 }
 
 func TestSearchAndFindAll(t *testing.T) {
-	service := NewServiceMock()
+	repo := NewInmemRepository()
+	service := NewService(repo)
 	b := &entity.Bookmark{
 		Name:        "Elton Minetto",
 		Description: "Minetto's page",
@@ -58,7 +60,8 @@ func TestSearchAndFindAll(t *testing.T) {
 }
 
 func TestDelete(t *testing.T) {
-	service := NewServiceMock()
+	repo := NewInmemRepository()
+	service := NewService(repo)
 	b := &entity.Bookmark{
 		Name:        "Elton Minetto",
 		Description: "Minetto's page",
