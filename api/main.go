@@ -4,32 +4,22 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"time"
-
 	"strconv"
+	"time"
 
 	"github.com/codegangsta/negroni"
 	"github.com/eminetto/clean-architecture-go/api/handler"
+	"github.com/eminetto/clean-architecture-go/config"
 	"github.com/eminetto/clean-architecture-go/pkg/bookmark"
 	"github.com/eminetto/clean-architecture-go/pkg/middleware"
 	"github.com/gorilla/context"
 	"github.com/gorilla/mux"
-	"github.com/joho/godotenv"
 	"github.com/juju/mgosession"
 	mgo "gopkg.in/mgo.v2"
 )
 
 func main() {
-	env := os.Getenv("BOOKMARK_ENV")
-	if env == "" {
-		env = "dev"
-	}
-	err := godotenv.Load("config/" + env + ".env")
-	if err != nil {
-		log.Fatal("Error loading .env file")
-	}
-
-	session, err := mgo.Dial(os.Getenv("MONGODB_HOST"))
+	session, err := mgo.Dial(config.MONGODB_HOST)
 	if err != nil {
 		log.Fatal(err.Error())
 	}
@@ -37,15 +27,10 @@ func main() {
 
 	r := mux.NewRouter()
 
-	cPool, err := strconv.Atoi(os.Getenv("MONGODB_CONNECTION_POOL"))
-	if err != nil {
-		log.Println(err.Error())
-		cPool = 10
-	}
-	mPool := mgosession.NewPool(nil, session, cPool)
+	mPool := mgosession.NewPool(nil, session, config.MONGODB_CONNECTION_POOL)
 	defer mPool.Close()
 
-	bookmarkRepo := bookmark.NewMongoRepository(mPool)
+	bookmarkRepo := bookmark.NewMongoRepository(mPool, config.MONGODB_DATABASE)
 	bookmarkService := bookmark.NewService(bookmarkRepo)
 
 	//handlers
@@ -65,7 +50,7 @@ func main() {
 	srv := &http.Server{
 		ReadTimeout:  5 * time.Second,
 		WriteTimeout: 10 * time.Second,
-		Addr:         ":" + os.Getenv("API_PORT"),
+		Addr:         ":" + strconv.Itoa(config.API_PORT),
 		Handler:      context.ClearHandler(http.DefaultServeMux),
 		ErrorLog:     logger,
 	}

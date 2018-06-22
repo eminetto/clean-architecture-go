@@ -2,94 +2,16 @@
 
 
 [[projects]]
-  branch = "master"
-  name = "github.com/GeertJohan/go.rice"
-  packages = [
-    ".",
-    "embedded"
-  ]
-  revision = "c02ca9a983da5807ddf7d796784928f5be4afd09"
-
-[[projects]]
-  name = "github.com/asaskevich/govalidator"
-  packages = ["."]
-  revision = "ccb8e960c48f04d6935e72476ae4a51028f9e22f"
-  version = "v9"
-
-[[projects]]
-  name = "github.com/aws/aws-sdk-go"
-  packages = [
-    "aws",
-    "aws/awserr",
-    "aws/awsutil",
-    "aws/client",
-    "aws/client/metadata",
-    "aws/corehandlers",
-    "aws/credentials",
-    "aws/credentials/ec2rolecreds",
-    "aws/credentials/endpointcreds",
-    "aws/credentials/stscreds",
-    "aws/defaults",
-    "aws/ec2metadata",
-    "aws/endpoints",
-    "aws/request",
-    "aws/session",
-    "aws/signer/v4",
-    "internal/sdkio",
-    "internal/sdkrand",
-    "internal/shareddefaults",
-    "private/protocol",
-    "private/protocol/query",
-    "private/protocol/query/queryutil",
-    "private/protocol/rest",
-    "private/protocol/xml/xmlutil",
-    "service/sqs",
-    "service/sts"
-  ]
-  revision = "ee7b4b1162937cba700de23bd90acb742982e626"
-  version = "v1.13.50"
-
-[[projects]]
-  name = "github.com/certifi/gocertifi"
-  packages = ["."]
-  revision = "deb3ae2ef2610fde3330947281941c562861188b"
-  version = "2018.01.18"
-
-[[projects]]
   name = "github.com/codegangsta/negroni"
   packages = ["."]
   revision = "5dbbc83f748fc3ad38585842b0aedab546d0ea1e"
   version = "v0.3.0"
 
 [[projects]]
-  branch = "master"
-  name = "github.com/daaku/go.zipexe"
-  packages = ["."]
-  revision = "a5fe2436ffcb3236e175e5149162b41cd28bd27d"
-
-[[projects]]
   name = "github.com/davecgh/go-spew"
   packages = ["spew"]
   revision = "346938d642f2ec3594ed81d874461961cd0faa76"
   version = "v1.1.0"
-
-[[projects]]
-  name = "github.com/dgrijalva/jwt-go"
-  packages = ["."]
-  revision = "06ea1031745cb8b3dab3f6a236daf2b0aa468b7e"
-  version = "v3.2.0"
-
-[[projects]]
-  branch = "master"
-  name = "github.com/getsentry/raven-go"
-  packages = ["."]
-  revision = "7452746037452673b6ba6ceb6c8aa4cbf4634f9e"
-
-[[projects]]
-  name = "github.com/go-ini/ini"
-  packages = ["."]
-  revision = "6529cf7c58879c08d927016dde4477f18a0634cb"
-  version = "v1.36.0"
 
 [[projects]]
   name = "github.com/gorilla/context"
@@ -105,23 +27,6 @@
 
 [[projects]]
   branch = "master"
-  name = "github.com/h2ik/go-sqs-poller"
-  packages = ["worker"]
-  revision = "e1521ae534362a089ffaf6d0c9b0ee647e95775c"
-
-[[projects]]
-  name = "github.com/jmespath/go-jmespath"
-  packages = ["."]
-  revision = "0b12d6b5"
-
-[[projects]]
-  name = "github.com/joho/godotenv"
-  packages = ["."]
-  revision = "a79fa1e548e2c689c241d10173efd51e5d689d5b"
-  version = "v1.2.0"
-
-[[projects]]
-  branch = "master"
   name = "github.com/juju/mgosession"
   packages = ["."]
   revision = "9ae6df2882cd783cf81d3315dca3b64707f6d675"
@@ -131,18 +36,6 @@
   name = "github.com/juju/utils"
   packages = ["clock"]
   revision = "2000ea4ff0431598aec2b7e1d11d5d49b5384d63"
-
-[[projects]]
-  branch = "master"
-  name = "github.com/kardianos/osext"
-  packages = ["."]
-  revision = "ae77be60afb1dcacde03767a8c37337fad28ac14"
-
-[[projects]]
-  name = "github.com/pkg/errors"
-  packages = ["."]
-  revision = "645ef00459ed84a119197bfb8d8205042c6df63d"
-  version = "v0.8.0"
 
 [[projects]]
   name = "github.com/pmezard/go-difflib"
@@ -155,15 +48,6 @@
   packages = ["assert"]
   revision = "12b6f73e6084dad08a7c6e575284b177ecafbc71"
   version = "v1.2.1"
-
-[[projects]]
-  branch = "master"
-  name = "golang.org/x/crypto"
-  packages = [
-    "bcrypt",
-    "blowfish"
-  ]
-  revision = "1a580b3eff7814fc9b40602fd35256c63b50f491"
 
 [[projects]]
   branch = "master"
@@ -192,6 +76,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "5945706c8957b294f6899d9698776a78d0e4a72f29fe240c38dfabe79e386c8b"
+  inputs-digest = "dcd571192c1a0624ad3e2e5d98fec2b729a9534afea9411d180e00eaa622281c"
   solver-name = "gps-cdcl"
   solver-version = 1
