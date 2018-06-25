@@ -2,4 +2,6 @@ language: go
 
 go:
   - "1.10.x"
+env:
+  - BOOKMARK_ENV=testing
 script: make ci
