@@ -2,6 +2,7 @@ package bookmark
 
 import "github.com/eminetto/clean-architecture-go/pkg/entity"
 
+//Reader interface
 type Reader interface {
 	Find(id entity.ID) (*entity.Bookmark, error)
 	Search(query string) ([]*entity.Bookmark, error)

@@ -39,7 +39,7 @@ func TestSearchAndFindAll(t *testing.T) {
 		Tags:        []string{"search", "engine"},
 		Favorite:    false,
 	}
-	_, _ = service.Store(b)
+	bID, _ := service.Store(b)
 	_, _ = service.Store(b2)
 
 	t.Run("search", func(t *testing.T) {
@@ -56,6 +56,12 @@ func TestSearchAndFindAll(t *testing.T) {
 		all, err := service.FindAll()
 		assert.Nil(t, err)
 		assert.Equal(t, 2, len(all))
+	})
+
+	t.Run("find", func(t *testing.T) {
+		saved, err := service.Find(bID)
+		assert.Nil(t, err)
+		assert.Equal(t, b.Name, saved.Name)
 	})
 }
 
@@ -76,12 +82,15 @@ func TestDelete(t *testing.T) {
 		Tags:        []string{"search", "engine"},
 		Favorite:    false,
 	}
-	_, _ = service.Store(b)
-	_, _ = service.Store(b2)
+	bID, _ := service.Store(b)
+	b2ID, _ := service.Store(b2)
 
-	err := service.Delete(b.ID)
+	err := service.Delete(bID)
 	assert.Equal(t, entity.ErrCannotBeDeleted, err)
 
-	err = service.Delete(b2.ID)
+	err = service.Delete(b2ID)
 	assert.Nil(t, err)
+	_, err = service.Find(b2ID)
+	assert.Equal(t, entity.ErrNotFound, err)
+
 }
