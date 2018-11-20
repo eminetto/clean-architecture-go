@@ -13,20 +13,19 @@ clean:
 	rm -rf bin/*
 
 dependencies:
-	go get -u github.com/golang/dep/cmd/dep
-	dep ensure
+	go mod download
 
 build: dependencies build-api build-cmd
 
 build-api: 
-	go build -tags $(CODENATION_ENV) -o ./bin/api api/main.go
+	go build -tags $(BOOKMARK_ENV) -o ./bin/api api/main.go
 
 build-cmd:
-	go build -tags $(CODENATION_ENV) -o ./bin/search cmd/main.go
+	go build -tags $(BOOKMARK_ENV) -o ./bin/search cmd/main.go
 
 linux-binaries:
-	CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -tags "$(CODENATION_ENV) netgo" -installsuffix netgo -o $(BIN_DIR)/api api/main.go
-	CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -tags "$(CODENATION_ENV) netgo" -installsuffix netgo -o $(BIN_DIR)/search cmd/main.go
+	CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -tags "$(BOOKMARK_ENV) netgo" -installsuffix netgo -o $(BIN_DIR)/api api/main.go
+	CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -tags "$(BOOKMARK_ENV) netgo" -installsuffix netgo -o $(BIN_DIR)/search cmd/main.go
 
 ci: dependencies test	
 
