@@ -7,6 +7,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/eminetto/clean-architecture-go/config"
 	_ "github.com/eminetto/clean-architecture-go/migrations"
 	migrate "github.com/eminetto/mongo-migrate"
 	"github.com/globalsign/mgo"
@@ -18,12 +19,12 @@ func main() {
 	}
 	option := os.Args[1]
 
-	session, err := mgo.Dial(os.Getenv("MONGODB_HOST"))
+	session, err := mgo.Dial(config.MONGODB_HOST)
 	if err != nil {
 		log.Fatal(err.Error())
 	}
 	defer session.Close()
-	db := session.DB(os.Getenv("MONGODB_DATABASE"))
+	db := session.DB(config.MONGODB_DATABASE)
 	migrate.SetDatabase(db)
 	migrate.SetMigrationsCollection("migrations")
 	migrate.SetLogger(log.New(os.Stdout, "INFO: ", 0))
