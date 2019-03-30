@@ -11,6 +11,7 @@ func TestStore(t *testing.T) {
 	repo := NewInmemRepository()
 	service := NewService(repo)
 	b := &entity.Bookmark{
+		ID:          entity.NewID(),
 		Name:        "Elton Minetto",
 		Description: "Minetto's page",
 		Link:        "http://www.eltonminetto.net",
@@ -19,7 +20,7 @@ func TestStore(t *testing.T) {
 	}
 	id, err := service.Store(b)
 	assert.Nil(t, err)
-	assert.True(t, entity.IsValidID(id.String()))
+	assert.True(t, entity.IsValidID(id.Hex()))
 }
 
 func TestSearchAndFindAll(t *testing.T) {

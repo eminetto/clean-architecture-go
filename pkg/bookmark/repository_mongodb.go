@@ -1,36 +1,40 @@
 package bookmark
 
 import (
+	"context"
+
+	"go.mongodb.org/mongo-driver/bson/primitive"
+
+	"go.mongodb.org/mongo-driver/mongo/options"
+
 	"github.com/eminetto/clean-architecture-go/pkg/entity"
-	"github.com/juju/mgosession"
-	mgo "gopkg.in/mgo.v2"
-	bson "gopkg.in/mgo.v2/bson"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 //MongoRepository mongodb repo
 type MongoRepository struct {
-	pool *mgosession.Pool
-	db   string
+	client *mongo.Client
+	db     string
 }
 
 //NewMongoRepository create new repository
-func NewMongoRepository(p *mgosession.Pool, db string) *MongoRepository {
+func NewMongoRepository(c *mongo.Client, db string) *MongoRepository {
 	return &MongoRepository{
-		pool: p,
-		db:   db,
+		client: c,
+		db:     db,
 	}
 }
 
 //Find a bookmark
 func (r *MongoRepository) Find(id entity.ID) (*entity.Bookmark, error) {
 	result := entity.Bookmark{}
-	session := r.pool.Session(nil)
-	coll := session.DB(r.db).C("bookmark")
-	err := coll.Find(bson.M{"_id": id}).One(&result)
+	coll := r.client.Database(r.db).Collection("bookmark")
+	err := coll.FindOne(context.TODO(), bson.M{"id": id}).Decode(&result)
 	switch err {
 	case nil:
 		return &result, nil
-	case mgo.ErrNotFound:
+	case mongo.ErrNoDocuments:
 		return nil, entity.ErrNotFound
 	default:
 		return nil, err
@@ -39,50 +43,68 @@ func (r *MongoRepository) Find(id entity.ID) (*entity.Bookmark, error) {
 
 //Store a bookmark
 func (r *MongoRepository) Store(b *entity.Bookmark) (entity.ID, error) {
-	session := r.pool.Session(nil)
-	coll := session.DB(r.db).C("bookmark")
-	err := coll.Insert(b)
+	coll := r.client.Database(r.db).Collection("bookmark")
+	_, err := coll.InsertOne(context.TODO(), b)
 	if err != nil {
-		return entity.ID(0), err
+		return entity.NewEmptyID(), err
 	}
+	// b.ID = insertResult.InsertedID.(entity.ID)
 	return b.ID, nil
 }
 
 //FindAll bookmarks
 func (r *MongoRepository) FindAll() ([]*entity.Bookmark, error) {
 	var d []*entity.Bookmark
-	session := r.pool.Session(nil)
-	coll := session.DB(r.db).C("bookmark")
-	err := coll.Find(nil).Sort("name").All(&d)
-	switch err {
-	case nil:
-		return d, nil
-	case mgo.ErrNotFound:
-		return nil, entity.ErrNotFound
-	default:
+	coll := r.client.Database(r.db).Collection("bookmark")
+	findOptions := options.Find()
+	findOptions.SetSort(bson.M{"name": 1})
+	cur, err := coll.Find(context.TODO(), bson.D{{}}, findOptions)
+	if err != nil {
 		return nil, err
 	}
+	for cur.Next(context.TODO()) {
+		var i entity.Bookmark
+		err := cur.Decode(&i)
+		if err != nil {
+			return nil, err
+		}
+		d = append(d, &i)
+	}
+	if len(d) == 0 {
+		return nil, entity.ErrNotFound
+	}
+	return d, nil
 }
 
 //Search bookmarks
 func (r *MongoRepository) Search(query string) ([]*entity.Bookmark, error) {
 	var d []*entity.Bookmark
-	session := r.pool.Session(nil)
-	coll := session.DB(r.db).C("bookmark")
-	err := coll.Find(bson.M{"name": &bson.RegEx{Pattern: query, Options: "i"}}).Limit(10).Sort("name").All(&d)
-	switch err {
-	case nil:
-		return d, nil
-	case mgo.ErrNotFound:
-		return nil, entity.ErrNotFound
-	default:
+	coll := r.client.Database(r.db).Collection("bookmark")
+	findOptions := options.Find()
+	findOptions.SetSort(bson.M{"name": 1})
+	findOptions.SetLimit(10)
+
+	cur, err := coll.Find(context.TODO(), bson.M{"name": primitive.Regex{Pattern: query, Options: "i"}})
+	if err != nil {
 		return nil, err
 	}
+	for cur.Next(context.TODO()) {
+		var i entity.Bookmark
+		err := cur.Decode(&i)
+		if err != nil {
+			return nil, err
+		}
+		d = append(d, &i)
+	}
+	if len(d) == 0 {
+		return nil, entity.ErrNotFound
+	}
+	return d, nil
 }
 
 //Delete a bookmark
 func (r *MongoRepository) Delete(id entity.ID) error {
-	session := r.pool.Session(nil)
-	coll := session.DB(r.db).C("bookmark")
-	return coll.Remove(bson.M{"_id": id})
+	coll := r.client.Database(r.db).Collection("bookmark")
+	_, err := coll.DeleteOne(context.TODO(), bson.M{"id": id})
+	return err
 }

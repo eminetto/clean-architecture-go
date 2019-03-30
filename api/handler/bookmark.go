@@ -53,8 +53,8 @@ func bookmarkAdd(service bookmark.UseCase) http.Handler {
 			w.Write([]byte(errorMessage))
 			return
 		}
-
-		b.ID, err = service.Store(b)
+		b.ID = entity.NewID()
+		_, err = service.Store(b)
 		if err != nil {
 			log.Println(err.Error())
 			w.WriteHeader(http.StatusInternalServerError)
