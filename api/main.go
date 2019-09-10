@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"log"
 	"net/http"
 	"os"
@@ -12,25 +13,34 @@ import (
 	"github.com/eminetto/clean-architecture-go/config"
 	"github.com/eminetto/clean-architecture-go/pkg/bookmark"
 	"github.com/eminetto/clean-architecture-go/pkg/middleware"
-	"github.com/gorilla/context"
+	gcontext "github.com/gorilla/context"
 	"github.com/gorilla/mux"
-	"github.com/juju/mgosession"
-	mgo "gopkg.in/mgo.v2"
+
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 func main() {
-	session, err := mgo.Dial(config.MONGODB_HOST)
+	clientOptions := options.Client().ApplyURI(config.MONGODB_HOST).SetMaxPoolSize(config.MONGODB_CONNECTION_POOL)
+	// Connect to MongoDB
+	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
+	defer cancel()
+	client, err := mongo.Connect(ctx, clientOptions)
+
 	if err != nil {
-		log.Fatal(err.Error())
+		log.Fatal(err)
 	}
-	defer session.Close()
+	// Check the connection
+	err = client.Ping(ctx, nil)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer client.Disconnect(ctx)
 
 	r := mux.NewRouter()
 
-	mPool := mgosession.NewPool(nil, session, config.MONGODB_CONNECTION_POOL)
-	defer mPool.Close()
-
-	bookmarkRepo := bookmark.NewMongoRepository(mPool, config.MONGODB_DATABASE)
+	bookmarkRepo := bookmark.NewMongoRepository(client, config.MONGODB_DATABASE)
 	bookmarkService := bookmark.NewService(bookmarkRepo)
 
 	//handlers
@@ -51,7 +61,7 @@ func main() {
 		ReadTimeout:  5 * time.Second,
 		WriteTimeout: 10 * time.Second,
 		Addr:         ":" + strconv.Itoa(config.API_PORT),
-		Handler:      context.ClearHandler(http.DefaultServeMux),
+		Handler:      gcontext.ClearHandler(http.DefaultServeMux),
 		ErrorLog:     logger,
 	}
 	err = srv.ListenAndServe()

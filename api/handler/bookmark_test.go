@@ -95,7 +95,7 @@ func TestBookmarkAdd(t *testing.T) {
 
 	var b *entity.Bookmark
 	json.NewDecoder(resp.Body).Decode(&b)
-	assert.True(t, entity.IsValidID(b.ID.String()))
+	assert.True(t, entity.IsValidID(b.ID.Hex()))
 	assert.Equal(t, "http://github.com", b.Link)
 	assert.False(t, b.CreatedAt.IsZero())
 }
@@ -110,6 +110,7 @@ func TestBookmarkFind(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, "/v1/bookmark/{id}", path)
 	b := &entity.Bookmark{
+		ID:          entity.NewID(),
 		Name:        "Elton Minetto",
 		Description: "Minetto's page",
 		Link:        "http://www.eltonminetto.net",
@@ -121,7 +122,7 @@ func TestBookmarkFind(t *testing.T) {
 	r.Handle("/v1/bookmark/{id}", handler)
 	ts := httptest.NewServer(r)
 	defer ts.Close()
-	res, err := http.Get(ts.URL + "/v1/bookmark/" + bID.String())
+	res, err := http.Get(ts.URL + "/v1/bookmark/" + bID.Hex())
 	assert.Nil(t, err)
 	assert.Equal(t, http.StatusOK, res.StatusCode)
 	var d *entity.Bookmark
@@ -148,7 +149,7 @@ func TestBookmarkRemove(t *testing.T) {
 	}
 	bID, _ := service.Store(b)
 	handler := bookmarkDelete(service)
-	req, _ := http.NewRequest("DELETE", "/v1/bookmark/"+bID.String(), nil)
+	req, _ := http.NewRequest("DELETE", "/v1/bookmark/"+bID.Hex(), nil)
 	r.Handle("/v1/bookmark/{id}", handler).Methods("DELETE", "OPTIONS")
 	rr := httptest.NewRecorder()
 	r.ServeHTTP(rr, req)

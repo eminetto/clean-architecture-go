@@ -12,10 +12,7 @@ BIN_DIR = $(PWD)/bin
 clean:
 	rm -rf bin/*
 
-dependencies:
-	go mod download
-
-build: dependencies build-api build-cmd
+build: build-api build-cmd
 
 build-api: 
 	go build -tags $(BOOKMARK_ENV) -o ./bin/api api/main.go
@@ -27,7 +24,7 @@ linux-binaries:
 	CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -tags "$(BOOKMARK_ENV) netgo" -installsuffix netgo -o $(BIN_DIR)/api api/main.go
 	CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -tags "$(BOOKMARK_ENV) netgo" -installsuffix netgo -o $(BIN_DIR)/search cmd/main.go
 
-ci: dependencies test	
+ci: test	
 
 test:
 	go test -tags testing ./...

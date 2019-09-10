@@ -1,16 +1,18 @@
 package main
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"log"
 	"os"
+	"time"
 
 	"github.com/eminetto/clean-architecture-go/config"
 	"github.com/eminetto/clean-architecture-go/pkg/bookmark"
 	"github.com/eminetto/clean-architecture-go/pkg/entity"
-	"github.com/juju/mgosession"
-	mgo "gopkg.in/mgo.v2"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 func handleParams() (string, error) {
@@ -26,16 +28,24 @@ func main() {
 		log.Fatal(err.Error())
 	}
 
-	session, err := mgo.Dial(config.MONGODB_HOST)
+	clientOptions := options.Client().ApplyURI(config.MONGODB_HOST).SetMaxPoolSize(config.MONGODB_CONNECTION_POOL)
+	// Connect to MongoDB
+	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
+	defer cancel()
+	client, err := mongo.Connect(ctx, clientOptions)
+
 	if err != nil {
-		log.Fatal(err.Error())
+		log.Fatal(err)
 	}
-	defer session.Close()
+	// Check the connection
+	err = client.Ping(ctx, nil)
 
-	mPool := mgosession.NewPool(nil, session, config.MONGODB_CONNECTION_POOL)
-	defer mPool.Close()
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer client.Disconnect(ctx)
 
-	bookmarkRepo := bookmark.NewMongoRepository(mPool, config.MONGODB_DATABASE)
+	bookmarkRepo := bookmark.NewMongoRepository(client, config.MONGODB_DATABASE)
 	bookmarkService := bookmark.NewService(bookmarkRepo)
 	all, err := bookmarkService.Search(query)
 	if err != nil {
