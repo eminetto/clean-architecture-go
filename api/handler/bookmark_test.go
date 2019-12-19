@@ -9,15 +9,17 @@ import (
 	"testing"
 
 	"github.com/codegangsta/negroni"
-	"github.com/eminetto/clean-architecture-go/pkg/bookmark"
+	"github.com/eminetto/clean-architecture-go/pkg/bookmark/mock"
 	"github.com/eminetto/clean-architecture-go/pkg/entity"
+	"github.com/golang/mock/gomock"
 	"github.com/gorilla/mux"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestBookmarkIndex(t *testing.T) {
-	repo := bookmark.NewInmemRepository()
-	service := bookmark.NewService(repo)
+	controller := gomock.NewController(t)
+	defer controller.Finish()
+	service := mock.NewMockUseCase(controller)
 	r := mux.NewRouter()
 	n := negroni.New()
 	MakeBookmarkHandlers(r, *n, service)
@@ -31,7 +33,9 @@ func TestBookmarkIndex(t *testing.T) {
 		Tags:        []string{"golang", "php", "linux", "mac"},
 		Favorite:    true,
 	}
-	_, _ = service.Store(b)
+	service.EXPECT().
+		FindAll().
+		Return([]*entity.Bookmark{b}, nil)
 	ts := httptest.NewServer(bookmarkIndex(service))
 	defer ts.Close()
 	res, err := http.Get(ts.URL)
@@ -40,18 +44,23 @@ func TestBookmarkIndex(t *testing.T) {
 }
 
 func TestBookmarkIndexNotFound(t *testing.T) {
-	repo := bookmark.NewInmemRepository()
-	service := bookmark.NewService(repo)
+	controller := gomock.NewController(t)
+	defer controller.Finish()
+	service := mock.NewMockUseCase(controller)
 	ts := httptest.NewServer(bookmarkIndex(service))
 	defer ts.Close()
+	service.EXPECT().
+		Search("github").
+		Return(nil, entity.ErrNotFound)
 	res, err := http.Get(ts.URL + "?name=github")
 	assert.Nil(t, err)
 	assert.Equal(t, http.StatusNotFound, res.StatusCode)
 }
 
 func TestBookmarkSearch(t *testing.T) {
-	repo := bookmark.NewInmemRepository()
-	service := bookmark.NewService(repo)
+	controller := gomock.NewController(t)
+	defer controller.Finish()
+	service := mock.NewMockUseCase(controller)
 	b := &entity.Bookmark{
 		Name:        "Elton Minetto",
 		Description: "Minetto's page",
@@ -59,7 +68,9 @@ func TestBookmarkSearch(t *testing.T) {
 		Tags:        []string{"golang", "php", "linux", "mac"},
 		Favorite:    true,
 	}
-	_, _ = service.Store(b)
+	service.EXPECT().
+		Search("minetto").
+		Return([]*entity.Bookmark{b}, nil)
 	ts := httptest.NewServer(bookmarkIndex(service))
 	defer ts.Close()
 	res, err := http.Get(ts.URL + "?name=minetto")
@@ -68,8 +79,9 @@ func TestBookmarkSearch(t *testing.T) {
 }
 
 func TestBookmarkAdd(t *testing.T) {
-	repo := bookmark.NewInmemRepository()
-	service := bookmark.NewService(repo)
+	controller := gomock.NewController(t)
+	defer controller.Finish()
+	service := mock.NewMockUseCase(controller)
 	r := mux.NewRouter()
 	n := negroni.New()
 	MakeBookmarkHandlers(r, *n, service)
@@ -77,6 +89,9 @@ func TestBookmarkAdd(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, "/v1/bookmark", path)
 
+	service.EXPECT().
+		Store(gomock.Any()).
+		Return(entity.NewID(), nil)
 	h := bookmarkAdd(service)
 
 	ts := httptest.NewServer(h)
@@ -95,14 +110,13 @@ func TestBookmarkAdd(t *testing.T) {
 
 	var b *entity.Bookmark
 	json.NewDecoder(resp.Body).Decode(&b)
-	assert.True(t, entity.IsValidID(b.ID.String()))
 	assert.Equal(t, "http://github.com", b.Link)
-	assert.False(t, b.CreatedAt.IsZero())
 }
 
 func TestBookmarkFind(t *testing.T) {
-	repo := bookmark.NewInmemRepository()
-	service := bookmark.NewService(repo)
+	controller := gomock.NewController(t)
+	defer controller.Finish()
+	service := mock.NewMockUseCase(controller)
 	r := mux.NewRouter()
 	n := negroni.New()
 	MakeBookmarkHandlers(r, *n, service)
@@ -110,29 +124,33 @@ func TestBookmarkFind(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, "/v1/bookmark/{id}", path)
 	b := &entity.Bookmark{
+		ID:          entity.NewID(),
 		Name:        "Elton Minetto",
 		Description: "Minetto's page",
 		Link:        "http://www.eltonminetto.net",
 		Tags:        []string{"golang", "php", "linux", "mac"},
 		Favorite:    true,
 	}
-	bID, _ := service.Store(b)
+	service.EXPECT().
+		Find(b.ID).
+		Return(b, nil)
 	handler := bookmarkFind(service)
 	r.Handle("/v1/bookmark/{id}", handler)
 	ts := httptest.NewServer(r)
 	defer ts.Close()
-	res, err := http.Get(ts.URL + "/v1/bookmark/" + bID.String())
+	res, err := http.Get(ts.URL + "/v1/bookmark/" + b.ID.String())
 	assert.Nil(t, err)
 	assert.Equal(t, http.StatusOK, res.StatusCode)
 	var d *entity.Bookmark
 	json.NewDecoder(res.Body).Decode(&d)
 	assert.NotNil(t, d)
-	assert.Equal(t, bID, d.ID)
+	assert.Equal(t, b.ID, d.ID)
 }
 
 func TestBookmarkRemove(t *testing.T) {
-	repo := bookmark.NewInmemRepository()
-	service := bookmark.NewService(repo)
+	controller := gomock.NewController(t)
+	defer controller.Finish()
+	service := mock.NewMockUseCase(controller)
 	r := mux.NewRouter()
 	n := negroni.New()
 	MakeBookmarkHandlers(r, *n, service)
@@ -140,15 +158,16 @@ func TestBookmarkRemove(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, "/v1/bookmark/{id}", path)
 	b := &entity.Bookmark{
+		ID:          entity.NewID(),
 		Name:        "Elton Minetto",
 		Description: "Minetto's page",
 		Link:        "http://www.eltonminetto.net",
 		Tags:        []string{"golang", "php", "linux", "mac"},
 		Favorite:    false,
 	}
-	bID, _ := service.Store(b)
+	service.EXPECT().Delete(b.ID).Return(nil)
 	handler := bookmarkDelete(service)
-	req, _ := http.NewRequest("DELETE", "/v1/bookmark/"+bID.String(), nil)
+	req, _ := http.NewRequest("DELETE", "/v1/bookmark/"+b.ID.String(), nil)
 	r.Handle("/v1/bookmark/{id}", handler).Methods("DELETE", "OPTIONS")
 	rr := httptest.NewRecorder()
 	r.ServeHTTP(rr, req)
