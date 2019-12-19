@@ -20,6 +20,7 @@ func TestStore(t *testing.T) {
 	id, err := service.Store(b)
 	assert.Nil(t, err)
 	assert.True(t, entity.IsValidID(id.String()))
+	assert.False(t, b.CreatedAt.IsZero())
 }
 
 func TestSearchAndFindAll(t *testing.T) {

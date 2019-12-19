@@ -29,6 +29,12 @@ linux-binaries:
 
 ci: dependencies test	
 
+build-mocks:
+	@go get github.com/golang/mock/gomock
+	@go install github.com/golang/mock/mockgen
+	@~/go/bin/mockgen -source=pkg/bookmark/interface.go -destination=pkg/bookmark/mock/bookmark.go -package=mock
+
+
 test:
 	go test -tags testing ./...
 
