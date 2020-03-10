@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
+	"github.com/eminetto/clean-architecture-go/pkg/metric"
 	"log"
 	"os"
 
@@ -21,6 +22,12 @@ func handleParams() (string, error) {
 }
 
 func main() {
+	metricService, err := metric.NewPrometheusService()
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+	appMetric := metric.NewCLI("bi")
+	appMetric.Started()
 	query, err := handleParams()
 	if err != nil {
 		log.Fatal(err.Error())
@@ -46,5 +53,10 @@ func main() {
 	}
 	for _, j := range all {
 		fmt.Printf("%s %s %v \n", j.Name, j.Link, j.Tags)
+	}
+	appMetric.Finished()
+	err = metricService.SaveCLI(appMetric)
+	if err != nil {
+		log.Fatal(err)
 	}
 }
