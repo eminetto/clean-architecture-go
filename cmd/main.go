@@ -26,7 +26,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err.Error())
 	}
-	appMetric := metric.NewCLI("bi")
+	appMetric := metric.NewCLI("search")
 	appMetric.Started()
 	query, err := handleParams()
 	if err != nil {
