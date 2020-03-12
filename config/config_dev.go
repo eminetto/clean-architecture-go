@@ -7,4 +7,5 @@ const (
 	MONGODB_DATABASE        = "bookmark"
 	MONGODB_CONNECTION_POOL = 5
 	API_PORT                = 8080
+	PROMETHEUS_PUSHGATEWAY = "http://localhost:9091/"
 )

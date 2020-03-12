@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"log"
 	"net/http"
 	"os"
@@ -12,6 +13,7 @@ import (
 	"github.com/eminetto/clean-architecture-go/config"
 	"github.com/eminetto/clean-architecture-go/pkg/bookmark"
 	"github.com/eminetto/clean-architecture-go/pkg/middleware"
+	"github.com/eminetto/clean-architecture-go/pkg/metric"
 	"github.com/gorilla/context"
 	"github.com/gorilla/mux"
 	"github.com/juju/mgosession"
@@ -33,15 +35,22 @@ func main() {
 	bookmarkRepo := bookmark.NewMongoRepository(mPool, config.MONGODB_DATABASE)
 	bookmarkService := bookmark.NewService(bookmarkRepo)
 
+	metricService, err := metric.NewPrometheusService()
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+
 	//handlers
 	n := negroni.New(
 		negroni.HandlerFunc(middleware.Cors),
+		negroni.HandlerFunc(middleware.Metrics(metricService)),
 		negroni.NewLogger(),
 	)
 	//bookmark
 	handler.MakeBookmarkHandlers(r, *n, bookmarkService)
 
 	http.Handle("/", r)
+	http.Handle("/metrics", promhttp.Handler())
 	r.HandleFunc("/ping", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 	})
