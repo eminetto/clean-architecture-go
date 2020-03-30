@@ -1,6 +1,7 @@
 module github.com/eminetto/clean-architecture-go
 
 require (
+	github.com/PaesslerAG/gval v1.0.1 // indirect
 	github.com/codegangsta/negroni v0.3.0
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/eminetto/mongo-migrate v0.1.2
@@ -19,9 +20,12 @@ require (
 	github.com/kr/pretty v0.1.0 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/prometheus/client_golang v1.5.0
-	github.com/stretchr/testify v1.4.0
+	github.com/steinfletcher/apitest v1.4.5
+	github.com/steinfletcher/apitest-jsonpath v1.4.1
+	github.com/stretchr/testify v1.5.1
 	gopkg.in/mgo.v2 v2.0.0-20180705113604-9856a29383ce
 	gopkg.in/tomb.v2 v2.0.0-20161208151619-d5d1b5820637 // indirect
+	gopkg.in/yaml.v2 v2.2.8 // indirect
 )
 
 go 1.13
