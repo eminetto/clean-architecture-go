@@ -2,6 +2,7 @@ package handler
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 
@@ -76,6 +77,7 @@ func bookmarkFind(service bookmark.UseCase) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		errorMessage := "Error reading bookmark"
 		vars := mux.Vars(r)
+		fmt.Println(vars)
 		id := vars["id"]
 		data, err := service.Find(entity.StringToID(id))
 		w.Header().Set("Content-Type", "application/json")
