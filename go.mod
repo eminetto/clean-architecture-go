@@ -1,6 +1,7 @@
 module github.com/eminetto/clean-architecture-go
 
 require (
+	github.com/asaskevich/govalidator v0.0.0-20200108200545-475eaeb16496
 	github.com/codegangsta/negroni v0.3.0
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/eminetto/mongo-migrate v0.1.2

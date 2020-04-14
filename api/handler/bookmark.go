@@ -2,14 +2,35 @@ package handler
 
 import (
 	"encoding/json"
+	"github.com/eminetto/clean-architecture-go/pkg/middleware"
 	"log"
+
 	"net/http"
+	"time"
 
 	"github.com/codegangsta/negroni"
 	"github.com/eminetto/clean-architecture-go/pkg/bookmark"
 	"github.com/eminetto/clean-architecture-go/pkg/entity"
 	"github.com/gorilla/mux"
+	valid "github.com/asaskevich/govalidator"
 )
+
+
+//BookmarkInput data
+type BookmarkInput struct {
+	ID          entity.ID  `json:"id" valid:"type(entity.ID)"`
+	Name        string    `json:"name" valid:"stringlength(1|50),required"`
+	Description string    `json:"description" valid:"stringlength(1|150),required"`
+	Link        string    `json:"link" valid:"url,required"`
+	Tags        []string  `json:"tags" valid:"-"`
+	Favorite    bool      `json:"favorite" valid:"required"`
+	CreatedAt   time.Time `json:"created_at" valid:"-"`
+}
+
+func (v *BookmarkInput) Validate() error {
+	_, err := valid.ValidateStruct(*v)
+	return err
+}
 
 func bookmarkIndex(service bookmark.UseCase) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -45,16 +66,15 @@ func bookmarkIndex(service bookmark.UseCase) http.Handler {
 func bookmarkAdd(service bookmark.UseCase) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		errorMessage := "Error adding bookmark"
-		var b *entity.Bookmark
-		err := json.NewDecoder(r.Body).Decode(&b)
-		if err != nil {
-			log.Println(err.Error())
-			w.WriteHeader(http.StatusInternalServerError)
-			w.Write([]byte(errorMessage))
-			return
+		i := r.Context().Value("InputParam").(*BookmarkInput)
+		b := &entity.Bookmark{
+			Name:        i.Name,
+			Description: i.Description,
+			Link:        i.Link,
+			Tags:        i.Tags,
+			Favorite:    i.Favorite,
 		}
-
-		b.ID, err = service.Store(b)
+		_, err := service.Store(b)
 		if err != nil {
 			log.Println(err.Error())
 			w.WriteHeader(http.StatusInternalServerError)
@@ -119,6 +139,7 @@ func MakeBookmarkHandlers(r *mux.Router, n negroni.Negroni, service bookmark.Use
 	)).Methods("GET", "OPTIONS").Name("bookmarkIndex")
 
 	r.Handle("/v1/bookmark", n.With(
+		negroni.HandlerFunc(middleware.Validate(&BookmarkInput{})),
 		negroni.Wrap(bookmarkAdd(service)),
 	)).Methods("POST", "OPTIONS").Name("bookmarkAdd")
 

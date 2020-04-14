@@ -92,9 +92,7 @@ func TestBookmarkAdd(t *testing.T) {
 	service.EXPECT().
 		Store(gomock.Any()).
 		Return(entity.NewID(), nil)
-	h := bookmarkAdd(service)
-
-	ts := httptest.NewServer(h)
+	ts := httptest.NewServer(r)
 	defer ts.Close()
 	payload := fmt.Sprintf(`{
   "name": "Github",
