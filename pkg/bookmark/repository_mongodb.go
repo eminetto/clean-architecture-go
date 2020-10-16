@@ -1,6 +1,7 @@
 package bookmark
 
 import (
+	"fmt"
 	"github.com/eminetto/clean-architecture-go/pkg/entity"
 	"github.com/juju/mgosession"
 	mgo "gopkg.in/mgo.v2"
@@ -43,7 +44,7 @@ func (r *MongoRepository) Store(b *entity.Bookmark) (entity.ID, error) {
 	coll := session.DB(r.db).C("bookmark")
 	err := coll.Insert(b)
 	if err != nil {
-		return entity.ID(0), err
+		return entity.ID(fmt.Sprint(0)), err
 	}
 	return b.ID, nil
 }
