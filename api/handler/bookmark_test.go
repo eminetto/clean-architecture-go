@@ -2,7 +2,6 @@ package handler
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -96,7 +95,7 @@ func TestBookmarkAdd(t *testing.T) {
 
 	ts := httptest.NewServer(h)
 	defer ts.Close()
-	payload := fmt.Sprintf(`{
+	payload := `{
   "name": "Github",
   "description": "Github site",
   "link": "http://github.com",
@@ -104,7 +103,7 @@ func TestBookmarkAdd(t *testing.T) {
     "git",
     "social"
   ]
-}`)
+}`
 	resp, _ := http.Post(ts.URL+"/v1/bookmark", "application/json", strings.NewReader(payload))
 	assert.Equal(t, http.StatusCreated, resp.StatusCode)
 
